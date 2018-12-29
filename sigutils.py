@@ -81,12 +81,16 @@ def pack(bits, preamble, n_bit_stuff=None,corr_thresh = 0.95):
     
     bytes = ['']
     
-    while b < n_bits:
+    while b < n_bits-n_preamble:
         if not preamble_detected:
             # lol sorry
             if correlate_strings(bits[b:b+n_preamble], preamble) > corr_thresh:
+                print "Premable Detected at bit %d" % b
+                print "Preamble : " + preamble
+                print "Detected : " + bits[b:b+n_preamble]
                 b += n_preamble
                 preamble_detected=True
+
             else:
                 b+= 1
         else:
