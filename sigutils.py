@@ -70,4 +70,39 @@ def from_ascii(char, to='hex', shift=False, lsb=False):
     elif to=='hex':
         return "{0:0{1}X}".format(int(val,2),2)
         
+def pack(bits, preamble, n_bit_stuff=None,corr_thresh = 0.95):
+    n_bits = len(bits)
+    n_preamble = len(preamble)
+    b=0
+    preamble_detected = False
     
+    stuff_count = 0
+    byte_count = 0
+    
+    bytes = ['']
+    
+    while b < n_bits:
+        if not preamble_detected:
+            # lol sorry
+            if correlate_strings(bits[b:b+n_preamble], preamble) > corr_thresh:
+                b += n_preamble
+                preamble_detected=True
+            else:
+                b+= 1
+        else:
+            if n_bit_stuff is not None and stuff_count >= n_bit_stuff:
+                b += 1
+                stuff_count = 0
+            else:
+                if byte_count == 8:
+                    bytes.append('')
+                    byte_count = 0
+                bytes[-1] += bits[b]
+                if bits[b] == '1':
+                    stuff_count += 1
+                else:
+                    stuff_count = 0
+                b+=1
+                byte_count += 1
+            
+    return bytes
